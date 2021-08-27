@@ -115,7 +115,13 @@ func UpdateTodo(ctx *gin.Context) {
 	}
 
 	author := fmt.Sprintf("%v", claims["username"])
-	service.UpdateTodo(todo, author)
+	todoID := ctx.Param("id")
+
+	err = service.UpdateTodo(todo, todoID, author)
+	if err != nil {
+		service.DisplayError(ctx, http.StatusBadRequest, err)
+		return
+	}
 
 	service.DisplaySuccess(ctx, http.StatusOK, "data successfully updated")
 }

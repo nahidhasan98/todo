@@ -31,24 +31,20 @@ func GetTodos(author string) []model.Todo {
 }
 
 func DeleteTodo(author, id string) error {
-	var todos []model.Todo
-	flag := false
+	err := errors.New("no todo found")
 
-	for _, val := range db.Todo {
-		if val.Author == author && val.ID == id {
-			flag = true
-		} else {
-			todos = append(todos, val)
+	for key, val := range db.Todo {
+		if val.ID == id {
+			if val.Author == author {
+				db.Todo = append(db.Todo[:key], db.Todo[key+1:]...)
+				err = nil
+			} else {
+				err = errors.New("not authorized")
+			}
 		}
 	}
 
-	db.Todo = todos
-
-	if flag {
-		return nil
-	} else {
-		return errors.New("no todo found")
-	}
+	return err
 }
 
 func DeleteTodos(author string) {
@@ -74,9 +70,13 @@ func AddTodo(todo model.Todo, author string) {
 	db.Todo = append(db.Todo, data)
 }
 
-func UpdateTodo(todo model.Todo, author string) {
+func UpdateTodo(todo model.Todo, id string, author string) error {
 	for key, val := range db.Todo {
-		if val.Author == author {
+		if val.ID == id {
+			if val.Author != author {
+				return errors.New("not authorized")
+			}
+
 			if todo.Task != "" {
 				db.Todo[key].Task = todo.Task
 			}
@@ -88,8 +88,11 @@ func UpdateTodo(todo model.Todo, author string) {
 			if todo.Task != "" {
 				db.Todo[key].Message = todo.Message
 			}
+			return nil
 		}
 	}
+
+	return errors.New("no todo found")
 }
 
 func getID() string {
