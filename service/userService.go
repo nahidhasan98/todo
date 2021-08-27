@@ -17,7 +17,7 @@ func GetAllUser(err error, isAuth bool) model.Response {
 
 	for _, val := range db.Users {
 		temp := model.Data{}
-		temp.Info = val
+		temp.User = val
 
 		if isAuth {
 			temp.Task = getTaskByUsername(val.Username)
@@ -51,7 +51,7 @@ func GetSingleUser(id string, err error, isAuth bool) (model.Response, error) {
 	for _, val := range db.Users {
 		if val.ID == id {
 			temp := model.Data{}
-			temp.Info = val
+			temp.User = val
 
 			if isAuth {
 				temp.Task = getTaskByUsername(val.Username)

@@ -1,7 +1,7 @@
 package model
 
 type Data struct {
-	Info User   `json:"info,omitempty"`
+	User User   `json:"user,omitempty"`
 	Task []Todo `json:"task,omitempty"`
 }
 
