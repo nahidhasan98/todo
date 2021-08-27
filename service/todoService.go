@@ -31,20 +31,18 @@ func GetTodos(author string) []model.Todo {
 }
 
 func DeleteTodo(author, id string) error {
-	err := errors.New("no todo found")
-
 	for key, val := range db.Todo {
 		if val.ID == id {
-			if val.Author == author {
-				db.Todo = append(db.Todo[:key], db.Todo[key+1:]...)
-				err = nil
-			} else {
-				err = errors.New("not authorized")
+			if val.Author != author {
+				return errors.New("not authorized")
 			}
+
+			db.Todo = append(db.Todo[:key], db.Todo[key+1:]...)
+			return nil
 		}
 	}
 
-	return err
+	return errors.New("no todo found")
 }
 
 func DeleteTodos(author string) {
