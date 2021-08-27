@@ -8,9 +8,8 @@ import (
 func main() {
 	router := gin.Default()
 
-	router.POST("/api/login", func(ctx *gin.Context) {
-		api.Login(ctx)
-	})
+	// login group
+	router.POST("/api/login", func(ctx *gin.Context) { api.Login(ctx) })
 
 	// user group
 	user := router.Group("/api/user")
