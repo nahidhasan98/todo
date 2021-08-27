@@ -18,6 +18,7 @@ func GetTodo(ctx *gin.Context) {
 
 	author := fmt.Sprintf("%v", claims["username"])
 	todoID := ctx.Param("id")
+	
 	todo, err := service.GetTodo(author, todoID)
 	if err != nil {
 		service.DisplayError(ctx, http.StatusBadRequest, err)

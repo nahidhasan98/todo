@@ -10,7 +10,11 @@ import (
 
 func GetTodo(author, id string) (*model.Todo, error) {
 	for _, val := range db.Todo {
-		if val.Author == author && val.ID == id {
+		if val.ID == id {
+			if val.Author != author {
+				return nil, errors.New("not authorized")
+			}
+
 			return &val, nil
 		}
 	}
