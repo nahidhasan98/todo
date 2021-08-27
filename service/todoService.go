@@ -77,12 +77,23 @@ func AddTodo(todo model.Todo, claims jwt.MapClaims) {
 }
 
 func UpdateTodo(todo model.Todo, claims jwt.MapClaims) {
-	data := &model.Todo{
-		Task:    todo.Task,
-		At:      todo.At,
-		Message: todo.Message,
+	author := claims["username"]
+
+	for key, val := range db.Todo {
+		if val.Author == author {
+			if todo.Task != "" {
+				db.Todo[key].Task = todo.Task
+			}
+
+			if todo.At != 0 {
+				db.Todo[key].At = todo.At
+			}
+
+			if todo.Task != "" {
+				db.Todo[key].Message = todo.Message
+			}
+		}
 	}
-	db.Todo = append(db.Todo, *data)
 }
 
 func getID() string {
