@@ -7,17 +7,62 @@ import (
 	"github.com/nahidhasan98/todo/model"
 )
 
-func GetAllUser() []model.User {
-	return db.Users
+func GetAllUser(err error, isAuth bool) model.Response {
+	data := model.Response{
+		Status: "success",
+	}
+	if !isAuth {
+		data.Message = err.Error() + ". limited access"
+	}
+
+	for _, val := range db.Users {
+		temp := model.Data{}
+		temp.Info = val
+
+		if isAuth {
+			temp.Task = getTaskByUsername(val.Username)
+		}
+
+		data.Data = append(data.Data, temp)
+	}
+
+	return data
 }
 
-func GetSingleUser(id string) (*model.User, error) {
-	for _, val := range db.Users {
-		if id == val.ID {
-			return &val, nil
+func getTaskByUsername(author string) []model.Todo {
+	data := []model.Todo{}
+	for _, val := range db.Todo {
+		if val.Author == author {
+			data = append(data, val)
 		}
 	}
-	return nil, errors.New("no user found")
+
+	return data
+}
+
+func GetSingleUser(id string, err error, isAuth bool) (model.Response, error) {
+	data := model.Response{
+		Status: "success",
+	}
+	if !isAuth {
+		data.Message = err.Error() + ". limited access"
+	}
+
+	for _, val := range db.Users {
+		if val.ID == id {
+			temp := model.Data{}
+			temp.Info = val
+
+			if isAuth {
+				temp.Task = getTaskByUsername(val.Username)
+			}
+
+			data.Data = append(data.Data, temp)
+			return data, nil
+		}
+	}
+
+	return data, errors.New("no user found")
 }
 
 func getUserInfoByUsername(username string) *model.User {
