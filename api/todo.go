@@ -65,8 +65,8 @@ func DeleteTodos(ctx *gin.Context) {
 	}
 
 	author := fmt.Sprintf("%v", claims["username"])
-
 	service.DeleteTodos(author)
+
 	service.DisplaySuccess(ctx, http.StatusOK, "todo list reset successfully")
 }
 
@@ -89,7 +89,9 @@ func AddTodo(ctx *gin.Context) {
 		return
 	}
 
-	service.AddTodo(todo, claims)
+	author := fmt.Sprintf("%v", claims["username"])
+	service.AddTodo(todo, author)
+
 	service.DisplaySuccess(ctx, http.StatusOK, "data successfully added")
 }
 
@@ -112,6 +114,8 @@ func UpdateTodo(ctx *gin.Context) {
 		return
 	}
 
-	service.UpdateTodo(todo, claims)
+	author := fmt.Sprintf("%v", claims["username"])
+	service.UpdateTodo(todo, author)
+
 	service.DisplaySuccess(ctx, http.StatusOK, "data successfully updated")
 }

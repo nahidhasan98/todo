@@ -2,10 +2,8 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/nahidhasan98/todo/db"
 	"github.com/nahidhasan98/todo/model"
 )
@@ -65,20 +63,18 @@ func DeleteTodos(author string) {
 	db.Todo = todos
 }
 
-func AddTodo(todo model.Todo, claims jwt.MapClaims) {
+func AddTodo(todo model.Todo, author string) {
 	data := model.Todo{
 		ID:      getID(),
 		Task:    todo.Task,
 		At:      todo.At,
 		Message: todo.Message,
-		Author:  fmt.Sprintf("%v", claims["username"]),
+		Author:  author,
 	}
 	db.Todo = append(db.Todo, data)
 }
 
-func UpdateTodo(todo model.Todo, claims jwt.MapClaims) {
-	author := claims["username"]
-
+func UpdateTodo(todo model.Todo, author string) {
 	for key, val := range db.Todo {
 		if val.Author == author {
 			if todo.Task != "" {
