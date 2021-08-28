@@ -4,22 +4,17 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/nahidhasan98/todo/model"
 	"github.com/nahidhasan98/todo/service"
 )
 
-func GetTodo(ctx *gin.Context) {
-	claims, err := service.ValidateToken(ctx)
-	if err != nil {
-		service.DisplayError(ctx, http.StatusUnauthorized, err)
-		return
-	}
-
+func GetSingleTodo(ctx *gin.Context, claims jwt.MapClaims) {
 	author := fmt.Sprintf("%v", claims["username"])
 	todoID := ctx.Param("id")
-	
-	todo, err := service.GetTodo(author, todoID)
+
+	todo, err := service.GetSingleTodo(author, todoID)
 	if err != nil {
 		service.DisplayError(ctx, http.StatusBadRequest, err)
 		return
@@ -28,58 +23,34 @@ func GetTodo(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, todo)
 }
 
-func GetTodos(ctx *gin.Context) {
-	claims, err := service.ValidateToken(ctx)
-	if err != nil {
-		service.DisplayError(ctx, http.StatusUnauthorized, err)
-		return
-	}
-
+func GetAllTodo(ctx *gin.Context, claims jwt.MapClaims) {
 	author := fmt.Sprintf("%v", claims["username"])
-	ctx.JSON(http.StatusOK, service.GetTodos(author))
+	ctx.JSON(http.StatusOK, service.GetAllTodo(author))
 }
 
-func DeleteTodo(ctx *gin.Context) {
-	claims, err := service.ValidateToken(ctx)
-	if err != nil {
-		service.DisplayError(ctx, http.StatusUnauthorized, err)
-		return
-	}
-
+func DeleteSingleTodo(ctx *gin.Context, claims jwt.MapClaims) {
 	author := fmt.Sprintf("%v", claims["username"])
 	todoID := ctx.Param("id")
 
-	err = service.DeleteTodo(author, todoID)
+	statusCode, err := service.DeleteSingleTodo(author, todoID)
 	if err != nil {
-		service.DisplayError(ctx, http.StatusBadRequest, err)
+		service.DisplayError(ctx, statusCode, err)
 		return
 	}
 
 	service.DisplaySuccess(ctx, http.StatusOK, "data successfully deleted")
 }
 
-func DeleteTodos(ctx *gin.Context) {
-	claims, err := service.ValidateToken(ctx)
-	if err != nil {
-		service.DisplayError(ctx, http.StatusUnauthorized, err)
-		return
-	}
-
+func DeleteAllTodo(ctx *gin.Context, claims jwt.MapClaims) {
 	author := fmt.Sprintf("%v", claims["username"])
-	service.DeleteTodos(author)
+	service.DeleteAllTodo(author)
 
 	service.DisplaySuccess(ctx, http.StatusOK, "todo list reset successfully")
 }
 
-func AddTodo(ctx *gin.Context) {
-	claims, err := service.ValidateToken(ctx)
-	if err != nil {
-		service.DisplayError(ctx, http.StatusUnauthorized, err)
-		return
-	}
-
+func AddTodo(ctx *gin.Context, claims jwt.MapClaims) {
 	var todo model.Todo
-	err = ctx.BindJSON(&todo)
+	err := ctx.BindJSON(&todo)
 	if err != nil {
 		service.DisplayError(ctx, http.StatusBadRequest, "invalid JSON object")
 		return
@@ -96,15 +67,9 @@ func AddTodo(ctx *gin.Context) {
 	service.DisplaySuccess(ctx, http.StatusOK, "data successfully added")
 }
 
-func UpdateTodo(ctx *gin.Context) {
-	claims, err := service.ValidateToken(ctx)
-	if err != nil {
-		service.DisplayError(ctx, http.StatusUnauthorized, err)
-		return
-	}
-
+func UpdateTodo(ctx *gin.Context, claims jwt.MapClaims) {
 	var todo model.Todo
-	err = ctx.BindJSON(&todo)
+	err := ctx.BindJSON(&todo)
 	if err != nil {
 		service.DisplayError(ctx, http.StatusBadRequest, "invalid JSON object")
 		return
@@ -118,9 +83,9 @@ func UpdateTodo(ctx *gin.Context) {
 	author := fmt.Sprintf("%v", claims["username"])
 	todoID := ctx.Param("id")
 
-	err = service.UpdateTodo(todo, todoID, author)
+	statusCode, err := service.UpdateTodo(todo, todoID, author)
 	if err != nil {
-		service.DisplayError(ctx, http.StatusBadRequest, err)
+		service.DisplayError(ctx, statusCode, err)
 		return
 	}
 

@@ -207,7 +207,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"task\": \"xyz\",\r\n    \"message\": \"optional\"\r\n}",
+							"raw": "{\r\n    \"task\": \"xyz updated\",\r\n    \"message\": \"optional\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"

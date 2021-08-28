@@ -35,6 +35,8 @@ func GenerateToken(user *model.User) (*model.Token, error) {
 		return nil, err
 	}
 
+	// prepare refresh token here, if needed
+
 	token := &model.Token{
 		AccessToken: accessToken,
 	}

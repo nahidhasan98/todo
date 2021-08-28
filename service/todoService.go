@@ -2,13 +2,14 @@ package service
 
 import (
 	"errors"
+	"net/http"
 	"strconv"
 
 	"github.com/nahidhasan98/todo/db"
 	"github.com/nahidhasan98/todo/model"
 )
 
-func GetTodo(author, id string) (*model.Todo, error) {
+func GetSingleTodo(author, id string) (*model.Todo, error) {
 	for _, val := range db.Todo {
 		if val.ID == id {
 			if val.Author != author {
@@ -22,7 +23,7 @@ func GetTodo(author, id string) (*model.Todo, error) {
 	return nil, errors.New("no todo found")
 }
 
-func GetTodos(author string) []model.Todo {
+func GetAllTodo(author string) []model.Todo {
 	var todos []model.Todo
 
 	for _, val := range db.Todo {
@@ -34,31 +35,28 @@ func GetTodos(author string) []model.Todo {
 	return todos
 }
 
-func DeleteTodo(author, id string) error {
+func DeleteSingleTodo(author, id string) (int, error) {
 	for key, val := range db.Todo {
 		if val.ID == id {
 			if val.Author != author {
-				return errors.New("not authorized")
+				return http.StatusUnauthorized, errors.New("not authorized")
 			}
 
 			db.Todo = append(db.Todo[:key], db.Todo[key+1:]...)
-			return nil
+			return 0, nil
 		}
 	}
 
-	return errors.New("no todo found")
+	return http.StatusBadRequest, errors.New("no todo found")
 }
 
-func DeleteTodos(author string) {
-	var todos []model.Todo
-
-	for _, val := range db.Todo {
-		if val.Author != author {
-			todos = append(todos, val)
+func DeleteAllTodo(author string) {
+	for key, val := range db.Todo {
+		if val.Author == author {
+			db.Todo = append(db.Todo[:key], db.Todo[key+1:]...)
+			break
 		}
 	}
-
-	db.Todo = todos
 }
 
 func AddTodo(todo model.Todo, author string) {
@@ -72,11 +70,11 @@ func AddTodo(todo model.Todo, author string) {
 	db.Todo = append(db.Todo, data)
 }
 
-func UpdateTodo(todo model.Todo, id string, author string) error {
+func UpdateTodo(todo model.Todo, id string, author string) (int, error) {
 	for key, val := range db.Todo {
 		if val.ID == id {
 			if val.Author != author {
-				return errors.New("not authorized")
+				return http.StatusUnauthorized, errors.New("not authorized")
 			}
 
 			if todo.Task != "" {
@@ -90,11 +88,12 @@ func UpdateTodo(todo model.Todo, id string, author string) error {
 			if todo.Task != "" {
 				db.Todo[key].Message = todo.Message
 			}
-			return nil
+
+			return 0, nil
 		}
 	}
 
-	return errors.New("no todo found")
+	return http.StatusBadRequest, errors.New("no todo found")
 }
 
 func getID() string {
