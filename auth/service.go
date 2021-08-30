@@ -1,4 +1,4 @@
-package service
+package auth
 
 import (
 	"errors"
@@ -8,12 +8,48 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/nahidhasan98/todo/model"
 )
 
 const secretKey = "somethingVerySecret"
 
-func prepareAccessToken(user *model.User) (string, error) {
+type AuthServiceInterface interface {
+	Authenticate(reqUser *User) (*User, error)
+	GenerateToken(user *User) (*Token, error)
+	ValidateToken(ctx *gin.Context) (jwt.MapClaims, error)
+}
+
+type AuthService struct {
+	repoService *repoStruct
+}
+
+func (a *AuthService) Authenticate(reqUser *User) (*User, error) {
+	dbUser, err := a.repoService.GetUserByUsername(reqUser.Username)
+	if err != nil {
+		return nil, err
+	}
+	if reqUser.Username == dbUser.Username && reqUser.Password == dbUser.Password {
+		return dbUser, nil
+	}
+
+	return nil, errors.New("wrong credentials")
+}
+
+func (authService *AuthService) GenerateToken(user *User) (*Token, error) {
+	accessToken, err := prepareAccessToken(user)
+	if err != nil {
+		return nil, err
+	}
+
+	// prepare refresh token here, if needed
+
+	token := &Token{
+		AccessToken: accessToken,
+	}
+
+	return token, nil
+}
+
+func prepareAccessToken(user *User) (string, error) {
 	claims := jwt.MapClaims{
 		"username":  user.Username,
 		"exp":       time.Now().Add(time.Minute * 90).Unix(),
@@ -24,21 +60,6 @@ func prepareAccessToken(user *model.User) (string, error) {
 	token, err := tkn.SignedString([]byte(secretKey))
 	if err != nil {
 		return "", err
-	}
-
-	return token, nil
-}
-
-func GenerateToken(user *model.User) (*model.Token, error) {
-	accessToken, err := prepareAccessToken(user)
-	if err != nil {
-		return nil, err
-	}
-
-	// prepare refresh token here, if needed
-
-	token := &model.Token{
-		AccessToken: accessToken,
 	}
 
 	return token, nil
@@ -89,4 +110,10 @@ func ValidateToken(ctx *gin.Context) (jwt.MapClaims, error) {
 	}
 
 	return *claims, nil
+}
+
+func NewAuthService(repo *repoStruct) *AuthService {
+	return &AuthService{
+		repoService: repo,
+	}
 }

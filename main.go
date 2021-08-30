@@ -1,36 +1,32 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
-	"github.com/nahidhasan98/todo/api"
-	"github.com/nahidhasan98/todo/middleware"
+	"github.com/globalsign/mgo"
+	"github.com/nahidhasan98/todo/auth"
+	"github.com/nahidhasan98/todo/config"
 )
+
+func initializeAllServices(router *gin.RouterGroup, dbSession *mgo.Session) {
+	auth.Init(router, dbSession)
+	//todo.Init(router, dbSession)
+}
 
 func main() {
 	router := gin.Default()
 
-	// login group
-	router.POST("/api/login", middleware.AutoPass(api.Login))
+	v1 := router.Group("/api")
 
-	// user group
-	user := router.Group("/api/user")
-	{
-		user.GET("", middleware.SpecialPass(api.GetUserData))
-		user.GET("/:id", middleware.SpecialPass(api.GetUserData))
+	session, err := mgo.Dial(config.DbConnectionString)
+	if err != nil {
+		fmt.Println("Database connection failed!")
+		return
 	}
 
-	// todo group
-	todo := router.Group("/api/todo")
-	{
-		todo.GET("/:id", middleware.GetPass(api.GetSingleTodo))
-		todo.GET("", middleware.GetPass(api.GetAllTodo))
-
-		todo.DELETE("/:id", middleware.GetPass(api.DeleteSingleTodo))
-		todo.DELETE("", middleware.GetPass(api.DeleteAllTodo))
-
-		todo.POST("", middleware.GetPass(api.AddTodo))
-		todo.PATCH("/:id", middleware.GetPass(api.UpdateTodo))
-	}
+	fmt.Println("Server running on port 8080...")
+	initializeAllServices(v1, session)
 
 	router.Run(":8080")
 }
