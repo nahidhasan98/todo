@@ -22,8 +22,8 @@ type AuthService struct {
 	repoService *repoStruct
 }
 
-func (a *AuthService) Authenticate(reqUser *User) (*User, error) {
-	dbUser, err := a.repoService.GetUserByUsername(reqUser.Username)
+func (authService *AuthService) Authenticate(reqUser *User) (*User, error) {
+	dbUser, err := authService.repoService.GetUserByUsername(reqUser.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +65,31 @@ func prepareAccessToken(user *User) (string, error) {
 	return token, nil
 }
 
+func (authService *AuthService) ValidateToken(ctx *gin.Context) (jwt.MapClaims, error) {
+	token, err := getTokenFromHeader(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	claims, err := checkToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	return *claims, nil
+}
+
+func getTokenFromHeader(ctx *gin.Context) (string, error) {
+	bearToken := ctx.GetHeader("Authorization")
+
+	strArr := strings.Split(bearToken, " ")
+	if len(strArr) == 2 {
+		return strArr[1], nil
+	}
+
+	return "", errors.New("no token provided")
+}
+
 func checkToken(tkn string) (*jwt.MapClaims, error) {
 	claims := &jwt.MapClaims{}
 
@@ -85,31 +110,6 @@ func checkToken(tkn string) (*jwt.MapClaims, error) {
 	}
 
 	return claims, nil
-}
-
-func getTokenFromHeader(ctx *gin.Context) (string, error) {
-	bearToken := ctx.GetHeader("Authorization")
-
-	strArr := strings.Split(bearToken, " ")
-	if len(strArr) == 2 {
-		return strArr[1], nil
-	}
-
-	return "", errors.New("no token provided")
-}
-
-func ValidateToken(ctx *gin.Context) (jwt.MapClaims, error) {
-	token, err := getTokenFromHeader(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	claims, err := checkToken(token)
-	if err != nil {
-		return nil, err
-	}
-
-	return *claims, nil
 }
 
 func NewAuthService(repo *repoStruct) *AuthService {

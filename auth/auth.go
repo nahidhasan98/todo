@@ -6,7 +6,7 @@ import (
 )
 
 func Init(router *gin.RouterGroup, dbSession *mgo.Session) {
-	repoService := NewRepository(dbSession)
-	authService := NewAuthService(repoService)
+	authRepo := NewRepository(dbSession)
+	authService := NewAuthService(authRepo)
 	makeHTTPHandlers(router, authService)
 }
