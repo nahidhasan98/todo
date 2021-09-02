@@ -73,7 +73,7 @@ func (handler *handlerStruct) getSingleUserHandler(ctx *gin.Context) {
 
 		if err2 != nil {
 			ctx.JSON(http.StatusBadRequest, UserResponse{
-				UData:   &[]Data{{User: *user}},
+				UData:   &[]Data{*user},
 				Err:     err2.Error(),
 				Message: err.Error() + " | limited access",
 			})
@@ -81,7 +81,7 @@ func (handler *handlerStruct) getSingleUserHandler(ctx *gin.Context) {
 		}
 
 		ctx.JSON(http.StatusOK, UserResponse{
-			UData:   &[]Data{{User: *user}},
+			UData:   &[]Data{*user},
 			Err:     "",
 			Message: err.Error() + " | limited access",
 		})

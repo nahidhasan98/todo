@@ -8,9 +8,9 @@ import (
 
 type repoInterface interface {
 	getAllUser() (*[]Data, error)
-	getSingleUser(username string) (*User, error)
-	getAllUserWithTask() (*User, error)
-	getSingleUserWithTask(username string) (*Data, error)
+	getAllUserWithTask() (*[]Data, error)
+	getSingleUser(id string) (*Data, error)
+	getSingleUserWithTask(id string) (*Data, error)
 }
 
 type repoStruct struct {
@@ -41,19 +41,6 @@ func (r *repoStruct) getAllUser() (*[]Data, error) {
 	return &resp, nil
 }
 
-func (r *repoStruct) getSingleUser(id string) (*User, error) {
-	var user User
-	coll := r.DBSession.DB(r.DBName).C(r.DBTable)
-	err := coll.Find(bson.M{"_id": id}).One(&user)
-	if err != nil {
-		return nil, err
-	}
-
-	user.Password = ""
-
-	return &user, nil
-}
-
 func (r *repoStruct) getAllUserWithTask() (*[]Data, error) {
 	var user []User
 	coll := r.DBSession.DB(r.DBName).C(r.DBTable)
@@ -82,6 +69,24 @@ func (r *repoStruct) getAllUserWithTask() (*[]Data, error) {
 	}
 
 	return &resp, nil
+}
+
+func (r *repoStruct) getSingleUser(id string) (*Data, error) {
+	var user User
+	coll := r.DBSession.DB(r.DBName).C(r.DBTable)
+	err := coll.Find(bson.M{"_id": id}).One(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Password = ""
+
+	resp := &Data{
+		User: user,
+		Task: []Todo{},
+	}
+
+	return resp, nil
 }
 
 func (r *repoStruct) getSingleUserWithTask(id string) (*Data, error) {

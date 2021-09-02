@@ -1,10 +1,10 @@
 package user
 
 type AuthServiceInterface interface {
-	GetAllUser() (*[]User, error)
-	GetSingleUser() (*User, error)
-	GetAllUserWithTask() (*UserResponse, error)
-	GetSingleUserWithTask() (*Data, error)
+	GetAllUser() (*[]Data, error)
+	GetAllUserWithTask() (*[]Data, error)
+	GetSingleUser(id string) (*Data, error)
+	GetSingleUserWithTask(id string) (*Data, error)
 }
 
 type UserService struct {
@@ -20,19 +20,19 @@ func (userService *UserService) GetAllUser() (*[]Data, error) {
 	return user, nil
 }
 
-func (userService *UserService) GetSingleUser(id string) (*User, error) {
-	user, err := userService.repoService.getSingleUser(id)
+func (userService *UserService) GetAllUserWithTask() (*[]Data, error) {
+	user, err := userService.repoService.getAllUserWithTask()
 	if err != nil {
-		return &User{}, err
+		return &[]Data{}, err
 	}
 
 	return user, nil
 }
 
-func (userService *UserService) GetAllUserWithTask() (*[]Data, error) {
-	user, err := userService.repoService.getAllUserWithTask()
+func (userService *UserService) GetSingleUser(id string) (*Data, error) {
+	user, err := userService.repoService.getSingleUser(id)
 	if err != nil {
-		return &[]Data{}, err
+		return &Data{}, err
 	}
 
 	return user, nil

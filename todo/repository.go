@@ -14,8 +14,7 @@ type repoInterface interface {
 	getSingleTodo(author, todoID string) (*Todo, error)
 	deleteAllTodo(author string) error
 	deleteSingleTodo(author, todoID string) error
-	updateTodo(todo *Todo, author, todoID string) (int, error)
-	getID() string
+	updateTodo(todo *Todo, author, todoID string) error
 }
 
 type repoStruct struct {

@@ -7,10 +7,10 @@ import (
 type TodoServiceInterface interface {
 	CreateTodo(todo *Todo, author string) error
 	GetAllTodo(author string) (*[]Todo, error)
-	GetSingleTodo()
-	DeleteAllTodo()
-	DeleteSingleTodo()
-	UpdateTodo()
+	GetSingleTodo(author, todoID string) (*Todo, error)
+	DeleteAllTodo(author string) error
+	DeleteSingleTodo(author, todoID string) error
+	UpdateTodo(todo *Todo, author, todoID string) error
 }
 
 type TodoService struct {
