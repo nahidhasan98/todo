@@ -7,8 +7,10 @@ import (
 )
 
 type repoInterface interface {
-	GetAllUser() (*[]User, error)
-	GetSingleUser(username string) (*User, error)
+	getAllUser() (*[]Data, error)
+	getSingleUser(username string) (*User, error)
+	getAllUserWithTask() (*User, error)
+	getSingleUserWithTask(username string) (*Data, error)
 }
 
 type repoStruct struct {
@@ -17,7 +19,7 @@ type repoStruct struct {
 	DBTable   string
 }
 
-func (r *repoStruct) GetAllUser() (*[]User, error) {
+func (r *repoStruct) getAllUser() (*[]Data, error) {
 	var user []User
 	coll := r.DBSession.DB(r.DBName).C(r.DBTable)
 	err := coll.Find(bson.M{}).All(&user)
@@ -25,24 +27,91 @@ func (r *repoStruct) GetAllUser() (*[]User, error) {
 		return nil, err
 	}
 
-	return &user, nil
+	var resp []Data
+
+	for _, val := range user {
+		var tData Data
+		tData.User = val
+		tData.User.Password = ""
+		tData.Task = []Todo{}
+
+		resp = append(resp, tData)
+	}
+
+	return &resp, nil
 }
 
-func (r *repoStruct) GetSingleUser(username string) (*User, error) {
+func (r *repoStruct) getSingleUser(id string) (*User, error) {
 	var user User
 	coll := r.DBSession.DB(r.DBName).C(r.DBTable)
-	err := coll.Find(bson.M{"username": username}).One(&user)
+	err := coll.Find(bson.M{"_id": id}).One(&user)
 	if err != nil {
 		return nil, err
 	}
 
+	user.Password = ""
+
 	return &user, nil
+}
+
+func (r *repoStruct) getAllUserWithTask() (*[]Data, error) {
+	var user []User
+	coll := r.DBSession.DB(r.DBName).C(r.DBTable)
+	err := coll.Find(bson.M{}).All(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp []Data
+
+	for _, val := range user {
+		val.Password = ""
+
+		var todo []Todo
+		coll := r.DBSession.DB(r.DBName).C("todo")
+		err := coll.Find(bson.M{"author": val.Username}).All(&todo)
+		if err != nil {
+			return nil, err
+		}
+
+		var tData Data
+		tData.User = val
+		tData.Task = todo
+
+		resp = append(resp, tData)
+	}
+
+	return &resp, nil
+}
+
+func (r *repoStruct) getSingleUserWithTask(id string) (*Data, error) {
+	var user User
+	coll := r.DBSession.DB(r.DBName).C(r.DBTable)
+	err := coll.Find(bson.M{"_id": id}).One(&user)
+	if err != nil {
+		return nil, err
+	}
+	user.Password = ""
+
+	var todo []Todo
+	coll = r.DBSession.DB(r.DBName).C("todo")
+	err = coll.Find(bson.M{"author": user.Username}).All(&todo)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &Data{
+		User: user,
+		Task: todo,
+	}
+
+	return resp, nil
 }
 
 func NewRepository(dbSession *mgo.Session) *repoStruct {
 	return &repoStruct{
 		DBSession: dbSession,
 		DBName:    config.DBName,
-		DBTable:   config.AuthTable,
+		DBTable:   config.UserTable,
 	}
 }

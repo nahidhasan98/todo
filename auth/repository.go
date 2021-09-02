@@ -7,7 +7,7 @@ import (
 )
 
 type repoInterface interface {
-	GetUserByUsername(username string) (*User, error)
+	getUserByUsername(username string) (*User, error)
 }
 
 type repoStruct struct {
@@ -16,7 +16,7 @@ type repoStruct struct {
 	DBTable   string
 }
 
-func (r *repoStruct) GetUserByUsername(username string) (*User, error) {
+func (r *repoStruct) getUserByUsername(username string) (*User, error) {
 	var user User
 	coll := r.DBSession.DB(r.DBName).C(r.DBTable)
 	err := coll.Find(bson.M{"username": username}).One(&user)

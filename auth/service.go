@@ -23,7 +23,7 @@ type AuthService struct {
 }
 
 func (authService *AuthService) Authenticate(reqUser *User) (*User, error) {
-	dbUser, err := authService.repoService.GetUserByUsername(reqUser.Username)
+	dbUser, err := authService.repoService.getUserByUsername(reqUser.Username)
 	if err != nil {
 		return nil, err
 	}

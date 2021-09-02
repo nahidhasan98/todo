@@ -7,13 +7,14 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/nahidhasan98/todo/auth"
 	"github.com/nahidhasan98/todo/config"
+	"github.com/nahidhasan98/todo/todo"
 	"github.com/nahidhasan98/todo/user"
 )
 
 func initializeAllServices(router *gin.RouterGroup, dbSession *mgo.Session) {
 	auth.Init(router, dbSession)
 	user.Init(router, dbSession)
-	//todo.Init(router, dbSession)
+	todo.Init(router, dbSession)
 }
 
 func main() {

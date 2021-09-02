@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nahidhasan98/todo/auth"
 )
 
 type HandlerInterface interface {
@@ -13,58 +14,92 @@ type HandlerInterface interface {
 
 type handlerStruct struct {
 	userService *UserService
+	authService *auth.AuthService
 }
 
-func makeHTTPHandlers(router *gin.RouterGroup, userService *UserService) {
+func makeHTTPHandlers(router *gin.RouterGroup, userService *UserService, authService *auth.AuthService) {
 	h := &handlerStruct{
 		userService: userService,
+		authService: authService,
 	}
 
 	router.GET("user", h.getAllUserHandler)
 	router.GET("user/:id", h.getSingleUserHandler)
 }
 
-type getAllUserResponse struct {
-	User *[]User `json:"user"`
-	Err  string  `json:"err"`
-}
+func (handler *handlerStruct) getAllUserHandler(ctx *gin.Context) {
+	_, err := handler.authService.ValidateToken(ctx)
+	if err != nil { // limited access. response anly user list
+		uData, err2 := handler.userService.GetAllUser()
+		if err2 != nil {
+			ctx.JSON(http.StatusBadRequest, UserResponse{
+				UData:   &[]Data{},
+				Err:     err2.Error(),
+				Message: err.Error() + " | limited access",
+			})
+			return
+		}
 
-func (h *handlerStruct) getAllUserHandler(ctx *gin.Context) {
-	user, err := h.userService.GetAllUser()
-
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, getAllUserResponse{
-			User: &[]User{},
-			Err:  err.Error(),
+		ctx.JSON(http.StatusOK, UserResponse{
+			UData:   uData,
+			Err:     "",
+			Message: err.Error() + " | limited access",
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, getAllUserResponse{
-		User: user,
-		Err:  "",
+	uData, err := handler.userService.GetAllUserWithTask()
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, UserResponse{
+			UData: &[]Data{},
+			Err:   err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, UserResponse{
+		UData: uData,
+		Err:   "",
 	})
 }
 
-type getSingleUserResponse struct {
-	User *User  `json:"user"`
-	Err  string `json:"err"`
-}
+func (handler *handlerStruct) getSingleUserHandler(ctx *gin.Context) {
+	id := ctx.Param("id")
 
-func (h *handlerStruct) getSingleUserHandler(ctx *gin.Context) {
-	username := ctx.Param("id")
-	user, err := h.userService.GetSingleUser(username)
+	_, err := handler.authService.ValidateToken(ctx)
+	if err != nil { // limited access. response anly user list
+		user, err2 := handler.userService.GetSingleUser(id)
 
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, getSingleUserResponse{
-			User: &User{},
-			Err:  err.Error(),
+		if err2 != nil {
+			ctx.JSON(http.StatusBadRequest, UserResponse{
+				UData:   &[]Data{{User: *user}},
+				Err:     err2.Error(),
+				Message: err.Error() + " | limited access",
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, UserResponse{
+			UData:   &[]Data{{User: *user}},
+			Err:     "",
+			Message: err.Error() + " | limited access",
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, getSingleUserResponse{
-		User: user,
-		Err:  "",
+	uData, err := handler.userService.GetSingleUserWithTask(id)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, UserResponse{
+			UData: &[]Data{},
+			Err:   err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, UserResponse{
+		UData: &[]Data{*uData},
+		Err:   "",
 	})
 }

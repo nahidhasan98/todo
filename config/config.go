@@ -6,4 +6,5 @@ const (
 	DBName    = "TODO"
 	AuthTable = "user"
 	TodoTable = "todo"
+	UserTable = "user"
 )
