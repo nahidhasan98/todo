@@ -12,7 +12,7 @@ import (
 
 const secretKey = "somethingVerySecret"
 
-type AuthServiceInterface interface {
+type AuthInterface interface {
 	Authenticate(reqUser *User) (*User, error)
 	GenerateToken(user *User) (*Token, error)
 	ValidateToken(ctx *gin.Context) (jwt.MapClaims, error)

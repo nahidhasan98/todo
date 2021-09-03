@@ -1,9 +1,5 @@
 package todo
 
-import (
-	"fmt"
-)
-
 type TodoServiceInterface interface {
 	CreateTodo(todo *Todo, author string) error
 	GetAllTodo(author string) (*[]Todo, error)
@@ -35,7 +31,6 @@ func (todoService *TodoService) GetAllTodo(author string) (*[]Todo, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(todo)
 	return todo, nil
 }
 

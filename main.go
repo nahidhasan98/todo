@@ -12,9 +12,10 @@ import (
 )
 
 func initializeAllServices(router *gin.RouterGroup, dbSession *mgo.Session) {
-	auth.Init(router, dbSession)
-	user.Init(router, dbSession)
-	todo.Init(router, dbSession)
+	authService := auth.Init(router, dbSession)
+
+	user.Init(router, dbSession, authService)
+	todo.Init(router, dbSession, authService)
 }
 
 func main() {

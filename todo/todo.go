@@ -6,10 +6,7 @@ import (
 	"github.com/nahidhasan98/todo/auth"
 )
 
-func Init(router *gin.RouterGroup, dbSession *mgo.Session) {
-	authRepo := auth.NewRepository(dbSession)
-	authService := auth.NewAuthService(authRepo)
-
+func Init(router *gin.RouterGroup, dbSession *mgo.Session, authService *auth.AuthService) {
 	todoRepo := NewRepository(dbSession)
 	todoService := NewUserService(todoRepo)
 	makeHTTPHandlers(router, todoService, authService)
