@@ -113,7 +113,7 @@ func (r *repoStruct) getSingleUserWithTask(id string) (*Data, error) {
 	return resp, nil
 }
 
-func NewRepository(dbSession *mgo.Session) *repoStruct {
+func NewRepository(dbSession *mgo.Session) repoInterface {
 	return &repoStruct{
 		DBSession: dbSession,
 		DBName:    config.DBName,

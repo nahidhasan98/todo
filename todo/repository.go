@@ -15,6 +15,7 @@ type repoInterface interface {
 	deleteAllTodo(author string) error
 	deleteSingleTodo(author, todoID string) error
 	updateTodo(todo *Todo, author, todoID string) error
+	getID() string
 }
 
 type repoStruct struct {
@@ -94,7 +95,7 @@ func (r *repoStruct) getID() string {
 	return fmt.Sprintf("t%v", count+1)
 }
 
-func NewRepository(dbSession *mgo.Session) *repoStruct {
+func NewRepository(dbSession *mgo.Session) repoInterface {
 	return &repoStruct{
 		DBSession: dbSession,
 		DBName:    config.DBName,

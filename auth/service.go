@@ -19,7 +19,7 @@ type AuthInterface interface {
 }
 
 type AuthService struct {
-	repoService *repoStruct
+	repoService repoInterface
 }
 
 func (authService *AuthService) Authenticate(reqUser *User) (*User, error) {
@@ -112,7 +112,7 @@ func checkToken(tkn string) (*jwt.MapClaims, error) {
 	return claims, nil
 }
 
-func NewAuthService(repo *repoStruct) *AuthService {
+func NewAuthService(repo repoInterface) *AuthService {
 	return &AuthService{
 		repoService: repo,
 	}

@@ -27,7 +27,7 @@ func (r *repoStruct) getUserByUsername(username string) (*User, error) {
 	return &user, nil
 }
 
-func NewRepository(dbSession *mgo.Session) *repoStruct {
+func NewRepository(dbSession *mgo.Session) repoInterface {
 	return &repoStruct{
 		DBSession: dbSession,
 		DBName:    config.DBName,

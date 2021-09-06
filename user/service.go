@@ -1,6 +1,6 @@
 package user
 
-type AuthServiceInterface interface {
+type UserInterface interface {
 	GetAllUser() (*[]Data, error)
 	GetAllUserWithTask() (*[]Data, error)
 	GetSingleUser(id string) (*Data, error)
@@ -8,7 +8,7 @@ type AuthServiceInterface interface {
 }
 
 type UserService struct {
-	repoService *repoStruct
+	repoService repoInterface
 }
 
 func (userService *UserService) GetAllUser() (*[]Data, error) {
@@ -47,7 +47,7 @@ func (userService *UserService) GetSingleUserWithTask(id string) (*Data, error) 
 	return user, nil
 }
 
-func NewUserService(repo *repoStruct) *UserService {
+func NewUserService(repo repoInterface) *UserService {
 	return &UserService{
 		repoService: repo,
 	}

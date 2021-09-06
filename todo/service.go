@@ -1,6 +1,6 @@
 package todo
 
-type TodoServiceInterface interface {
+type TodoInterface interface {
 	CreateTodo(todo *Todo, author string) error
 	GetAllTodo(author string) (*[]Todo, error)
 	GetSingleTodo(author, todoID string) (*Todo, error)
@@ -10,7 +10,7 @@ type TodoServiceInterface interface {
 }
 
 type TodoService struct {
-	repoService *repoStruct
+	repoService repoInterface
 }
 
 func (todoService *TodoService) CreateTodo(todo *Todo, author string) error {
@@ -79,7 +79,7 @@ func (todoService *TodoService) UpdateTodo(todo *Todo, author, todoID string) er
 	return nil
 }
 
-func NewUserService(repo *repoStruct) *TodoService {
+func NewUserService(repo repoInterface) *TodoService {
 	return &TodoService{
 		repoService: repo,
 	}
