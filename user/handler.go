@@ -28,7 +28,7 @@ func makeHTTPHandlers(router *gin.RouterGroup, userService *UserService, authSer
 }
 
 func (handler *handlerStruct) getAllUserHandler(ctx *gin.Context) {
-	_, err := handler.authService.ValidateToken(ctx)
+	_, err := handler.authService.ParseToken(ctx)
 	if err != nil { // limited access. response anly user list
 		uData, err2 := handler.userService.GetAllUser()
 		if err2 != nil {
@@ -67,7 +67,7 @@ func (handler *handlerStruct) getAllUserHandler(ctx *gin.Context) {
 func (handler *handlerStruct) getSingleUserHandler(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	_, err := handler.authService.ValidateToken(ctx)
+	_, err := handler.authService.ParseToken(ctx)
 	if err != nil { // limited access. response anly user list
 		user, err2 := handler.userService.GetSingleUser(id)
 

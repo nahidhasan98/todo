@@ -15,7 +15,7 @@ const secretKey = "somethingVerySecret"
 type AuthInterface interface {
 	Authenticate(reqUser *User) (*User, error)
 	GenerateToken(user *User) (*Token, error)
-	ValidateToken(ctx *gin.Context) (jwt.MapClaims, error)
+	ParseToken(ctx *gin.Context) (jwt.MapClaims, error)
 }
 
 type AuthService struct {
@@ -65,7 +65,7 @@ func prepareAccessToken(user *User) (string, error) {
 	return token, nil
 }
 
-func (authService *AuthService) ValidateToken(ctx *gin.Context) (jwt.MapClaims, error) {
+func (authService *AuthService) ParseToken(ctx *gin.Context) (jwt.MapClaims, error) {
 	token, err := getTokenFromHeader(ctx)
 	if err != nil {
 		return nil, err

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/nahidhasan98/todo/auth"
+	"github.com/nahidhasan98/todo/middleware"
 )
 
 type HandlerInterface interface {
@@ -28,6 +29,8 @@ func makeHTTPHandlers(router *gin.RouterGroup, todoService *TodoService, authSer
 		todoService: todoService,
 	}
 
+	router.Use(middleware.Authorization(authService))
+
 	router.POST("todo", h.createTodoHandler)
 	router.GET("todo", h.getAllTodoHandler)
 	router.GET("todo/:id", h.getSingleTodoHandler)
@@ -37,17 +40,8 @@ func makeHTTPHandlers(router *gin.RouterGroup, todoService *TodoService, authSer
 }
 
 func (handler *handlerStruct) createTodoHandler(ctx *gin.Context) {
-	claims, err := handler.authService.ValidateToken(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, &Response{
-			Status:  "error",
-			Message: err.Error(),
-		})
-		return
-	}
-
 	var todo Todo
-	err = ctx.BindJSON(&todo)
+	err := ctx.BindJSON(&todo)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, &Response{
 			Status:  "error",
@@ -64,7 +58,9 @@ func (handler *handlerStruct) createTodoHandler(ctx *gin.Context) {
 		return
 	}
 
+	claims, _ := handler.authService.ParseToken(ctx)
 	author := fmt.Sprintf("%v", claims["username"])
+
 	err = handler.todoService.CreateTodo(&todo, author)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, &Response{
@@ -81,15 +77,7 @@ func (handler *handlerStruct) createTodoHandler(ctx *gin.Context) {
 }
 
 func (handler *handlerStruct) getAllTodoHandler(ctx *gin.Context) {
-	claims, err := handler.authService.ValidateToken(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, &Response{
-			Status:  "error",
-			Message: err.Error(),
-		})
-		return
-	}
-
+	claims, _ := handler.authService.ParseToken(ctx)
 	author := fmt.Sprintf("%v", claims["username"])
 
 	todo, err := handler.todoService.GetAllTodo(author)
@@ -105,15 +93,7 @@ func (handler *handlerStruct) getAllTodoHandler(ctx *gin.Context) {
 }
 
 func (handler *handlerStruct) getSingleTodoHandler(ctx *gin.Context) {
-	claims, err := handler.authService.ValidateToken(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, &Response{
-			Status:  "error",
-			Message: err.Error(),
-		})
-		return
-	}
-
+	claims, _ := handler.authService.ParseToken(ctx)
 	author := fmt.Sprintf("%v", claims["username"])
 	todoID := ctx.Param("id")
 
@@ -129,17 +109,10 @@ func (handler *handlerStruct) getSingleTodoHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, todo)
 }
 func (handler *handlerStruct) deleteAllTodoHandler(ctx *gin.Context) {
-	claims, err := handler.authService.ValidateToken(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, &Response{
-			Status:  "error",
-			Message: err.Error(),
-		})
-		return
-	}
-
+	claims, _ := handler.authService.ParseToken(ctx)
 	author := fmt.Sprintf("%v", claims["username"])
-	err = handler.todoService.DeleteAllTodo(author)
+
+	err := handler.todoService.DeleteAllTodo(author)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, &Response{
 			Status:  "error",
@@ -154,19 +127,11 @@ func (handler *handlerStruct) deleteAllTodoHandler(ctx *gin.Context) {
 	})
 }
 func (handler *handlerStruct) deleteSingleTodoHandler(ctx *gin.Context) {
-	claims, err := handler.authService.ValidateToken(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, &Response{
-			Status:  "error",
-			Message: err.Error(),
-		})
-		return
-	}
-
+	claims, _ := handler.authService.ParseToken(ctx)
 	author := fmt.Sprintf("%v", claims["username"])
 	todoID := ctx.Param("id")
 
-	err = handler.todoService.DeleteSingleTodo(author, todoID)
+	err := handler.todoService.DeleteSingleTodo(author, todoID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, &Response{
 			Status:  "error",
@@ -181,16 +146,8 @@ func (handler *handlerStruct) deleteSingleTodoHandler(ctx *gin.Context) {
 	})
 }
 func (handler *handlerStruct) updateTodoHandler(ctx *gin.Context) {
-	claims, err := handler.authService.ValidateToken(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, &Response{
-			Status:  "error",
-			Message: err.Error(),
-		})
-		return
-	}
 	var todo Todo
-	err = ctx.BindJSON(&todo)
+	err := ctx.BindJSON(&todo)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, &Response{
 			Status:  "error",
@@ -207,6 +164,7 @@ func (handler *handlerStruct) updateTodoHandler(ctx *gin.Context) {
 		return
 	}
 
+	claims, _ := handler.authService.ParseToken(ctx)
 	author := fmt.Sprintf("%v", claims["username"])
 	todoID := ctx.Param("id")
 
