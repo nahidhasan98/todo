@@ -1,2 +1,6 @@
 # all exe file
 *.exe
+
+
+# db folder
+/mongodb

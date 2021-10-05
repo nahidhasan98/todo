@@ -7,7 +7,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - /mongodb:/data/db      # the mongodb folder will be created at / location
+      - ./mongodb:/data/db    # the mongodb folder will be created at / location
 
   todo-app:
     build: .                  # docker image will be created/built first, then that image will be used
