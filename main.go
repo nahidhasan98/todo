@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo"
@@ -29,8 +31,33 @@ func main() {
 		return
 	}
 
+	// data seeding from JSON file
+	err = seedFromJSONFile(session)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	fmt.Println("Server running on port 8080...")
 	initializeAllServices(v1, session)
 
 	router.Run(":8080")
+}
+
+func seedFromJSONFile(session *mgo.Session) error {
+	data, err := ioutil.ReadFile("static/data/user.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var dataArray user.User
+
+	err = json.Unmarshal(data, &dataArray)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	coll := session.DB(config.DBName).C(config.UserTable)
+	err = coll.Insert(&dataArray)
+
+	return err
 }

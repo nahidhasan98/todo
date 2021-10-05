@@ -6,27 +6,16 @@ services:
     container_name: mongodb
     ports:
       - "27017:27017"
-    networks:
-      - mynet
     volumes:
-      - mongodb:/data/db      # this volume will be used by this db service
+      - /mongodb:/data/db      # the mongodb folder will be created at / location
 
   todo-app:
     build: .                  # docker image will be created/built first, then that image will be used
     container_name: todo-app  # a container will be created with this name
     ports:
       - "8080:8080"
-    networks:
-      - mynet
     environment:
                               # db: we named database service as 'db' before, which will provide host ie connection string
       - "MongoDB_host=db"     # inside src code: os.Getenv("MongoDB_host")
     depends_on:
       - db                    # our database service
-
-networks:
-  mynet:
-    driver: bridge
-
-volumes:
-  mongodb:
